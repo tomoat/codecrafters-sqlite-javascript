@@ -13,6 +13,24 @@ and more.
 **Note**: If you're viewing this repo on GitHub, head over to
 [codecrafters.io](https://codecrafters.io) to try the challenge.
 
+# Repository Setup
+
+We've prepared a starter repository with some JavaScript code for you.
+
+**Step 1**: Clone the repository.
+
+```sh
+git clone https://git.codecrafters.io/acf8553bb5c61199 codecrafters-sqlite-javascript && cd codecrafters-sqlite-javascript
+```
+
+**Step 2**: Push an empty commit.
+
+```sh
+git commit --allow-empty -m 'test' && git push origin master
+```
+
+🎉 Git push received! The first stage is now activated.
+
 # Passing the first stage
 
 The entry point for your SQLite implementation is in `app/main.js`. Study and
