@@ -3,20 +3,22 @@ import { open } from "fs/promises";
 const databaseFilePath = process.argv[2];
 const command = process.argv[3];
 
-if (command === ".dbinfo") {
-  const databaseFileHandler = await open(databaseFilePath, "r");
+const databaseFileHandler = await open(databaseFilePath, "r");
 
-  const { buffer } = await databaseFileHandler.read({
-    length: 100,
-    position: 0,
-    buffer: Buffer.alloc(100),
-  });
+const { buffer } = await databaseFileHandler.read({
+  length: 100,
+  position: 0,
+  buffer: Buffer.alloc(100),
+});
+const pageSize = buffer.readUInt16BE(16); // page size is 2 bytes starting at offset 16
+
+if (command === ".dbinfo") {
 
   // You can use print statements as follows for debugging, they'll be visible when running tests.
   // console.log("Logs from your program will appear here!");
 
   // Uncomment this to pass the first stage
-  const pageSize = buffer.readUInt16BE(16); // page size is 2 bytes starting at offset 16
+
   console.log(`database page size: ${pageSize}`);
 
   // buffer.readUInt16BE（16）从缓冲区中读取页面大小，console.log将其打印出来。if语句检查页面大小是否小于112（标头为100，最小所需数据为12），如果小于，则抛出错误。
@@ -36,7 +38,20 @@ if (command === ".dbinfo") {
   const numCells = sqliteSchemaHeader.readUInt16BE(3)
   console.log(`number of tables: ${numCells}`)
 
-  await databaseFileHandler.close()
+} else if (command === '.tables') {
+  const { buffer: pageHeaderBuffer } = await databaseFileHandler.read({
+    length: pageSize,
+    position: 100,
+    buffer: Buffer.alloc(pageSize),
+  })
+
+  const regex = /CREATE TABLE (?!sqlite_)(\w+)/g
+  const tables = (pageHeaderBuffer.toString().match(regex) || []).map((element) =>
+    element.replace('CREATE TABLE', '').trim(),
+  )
+  console.log(...tables.reverse())
 } else {
   throw `Unknown command ${command}`;
 }
+
+await databaseFileHandler.close()
